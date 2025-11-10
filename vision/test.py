@@ -1,16 +1,16 @@
 import cv2, json
 import numpy as np
-from vision.detector import BallDetector2D
+from detector import BallDetector2D
 
 cfg = {
-    "ball_hsv_lower": [20, 80, 80],
-    "ball_hsv_upper": [40, 255, 255],
+    "ball_hsv_lower": [10, 161, 214],
+    "ball_hsv_upper": [25, 255, 255],
     "min_radius_px": 5,
-    "max_radius_px": 80,
-    "deglare": True
+    "max_radius_px": 200,
+    "deglare": False
 }
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 det = BallDetector2D(cfg)
 
 while True:

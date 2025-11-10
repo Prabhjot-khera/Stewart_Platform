@@ -85,30 +85,49 @@ class CircleMapper:
         v = int(round(v0 + dv))
         return (u, v)
 
-    # ---------- internals ----------
-    def _fit_rim(self, frame_bgr: np.ndarray) -> None:
-        gray = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
-        gray = cv2.GaussianBlur(gray, (5,5), 0)
-        edges = cv2.Canny(gray, self.canny_low, self.canny_high)
+    def _fit_rim(self, frame_bgr) -> None:
+       
+        
 
+        h, w = frame_bgr.shape[:2]
+        min_area = 0.05 * (w * h)  # ignore small contours (<5% of image); tune as needed
+
+        # 1) HSV green mask
+        hsv = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2HSV)
+        # Default green band; adjust S/V mins if lighting is dim
+        green_lo = np.array([35,  60,  60], np.uint8)
+        green_hi = np.array([85, 255, 255], np.uint8)
+        mask = cv2.inRange(hsv, green_lo, green_hi)
+
+        # 2) Clean up mask (open/close) and get edges
+        k3 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
+        k5 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5,5))
+        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, k3, iterations=1)
+        mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, k5, iterations=2)
+
+        edges = cv2.Canny(mask, self.canny_low, self.canny_high)
+        edges = cv2.dilate(edges, k3, iterations=1)  # fuse small gaps
+
+        # 3) Largest valid contour
         cnts, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        cnts = [c for c in cnts if cv2.contourArea(cv2.convexHull(c)) > min_area]
         if not cnts:
             self.rim = RimFit(False)
             return
 
-        # choose the largest contour (by area of its convex hull)
-        best_c = max(cnts, key=lambda c: cv2.contourArea(cv2.convexHull(c)))
-        if len(best_c) < 5:
+        best = max(cnts, key=lambda c: cv2.contourArea(cv2.convexHull(c)))
+        if len(best) < 5:
             self.rim = RimFit(False)
             return
 
-        ellipse = cv2.fitEllipse(best_c)  # ((u0,v0),(W,H), angle_deg)
-        (u0, v0), (W, H), angle_deg = ellipse
-        # semi-axes:
-        a = max(W, H) * 0.5
-        b = min(W, H) * 0.5
-        # angle of major axis (OpenCV gives deg, measured from x to major)
-        psi = math.radians(angle_deg)
+        # 4) Ellipse fit + normalize angle to major axis
+        (u0, v0), (W, H), angle_deg = cv2.fitEllipse(best)
+        if H > W:
+            a = 0.5 * H; b = 0.5 * W
+            psi = math.radians(angle_deg + 90.0)
+        else:
+            a = 0.5 * W; b = 0.5 * H
+            psi = math.radians(angle_deg)
 
         self.rim = RimFit(True, (float(u0), float(v0)), float(a), float(b), float(psi))
 
@@ -145,7 +164,7 @@ if __name__ == "__main__":
         exit()
 
     start = time.time()
-    MAX_RUNTIME = 20  # seconds
+    MAX_RUNTIME = 40  # seconds
 
     while True:
         if time.time() - start > MAX_RUNTIME:
