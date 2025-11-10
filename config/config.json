@@ -6,68 +6,49 @@
     "fps": 60
   },
 
+  "vision": {
+    "ball_hsv_lower": [10, 120, 120],
+    "ball_hsv_upper": [25, 255, 255],
+    "erode_iter": 2,
+    "dilate_iter": 2,
+    "morph_kernel": 5,
+    "min_radius_px": 8,
+    "max_radius_px": 80,
+    "min_area_frac": 0.0003,
+    "deglare": false
+  },
+
   "plate": {
     "radius_m": 0.10,
     "servo_azimuth_deg": [0, 120, 240]
   },
 
-  "vision": {
-    "ball_hsv_lower": [10, 161, 214],
-    "ball_hsv_upper": [25, 255, 255],
-    "min_radius_px": 5,
-    "max_radius_px": 80,
-    "deglare": true
+  "mapping": {
+    "ellipse_refresh_interval": 5,
+    "edge_canny": { "low": 60, "high": 160 },
+
+    "rim_color": "green",
+    "green_hsv_lower": [35, 60, 60],
+    "green_hsv_upper": [85, 255, 255],
+
+    "min_rim_area_frac": 0.05
   },
 
-  "mapping": {
-    "mode": "ellipse_affine",
-    "edge_canny": { "low": 60, "high": 160 },
-    "ellipse_refresh_interval": 5
+  "control": {
+    "loop_hz": 60,
+    "tilt_deg_limit": 6,
+
+    "pid_x": { "kp": 6.0, "ki": 0.0, "kd": 0.8, "d_lp_hz": 20.0, "i_clamp": 0.2 },
+    "pid_y": { "kp": 6.0, "ki": 0.0, "kd": 0.8, "d_lp_hz": 20.0, "i_clamp": 0.2 }
+  },
+
+  "ik": {
+    "Reff_m": [0.015, 0.015, 0.015]
   },
 
   "servo": {
     "port": "COM5",
     "baud": 115200,
-    "theta0_deg": [15.0, 14.7, 15.1],
-    "limits_deg": { "min": 0, "max": 180 },
-    "rate_limit_dps": 180
-  },
-
-  "ik": {
-    "mode": "small_angle",
-    "Reff_m": [0.012, 0.012, 0.012],
-    "identified_M": [[0, 0], [0, 0], [0, 0]],
-    "use_leg_models": false
-  },
-
-  "legs": [
-    { "horn_len_m": 0.010, "link_len_m": 0.060, "theta0_deg": 15.0, "azimuth_deg": 0 },
-    { "horn_len_m": 0.010, "link_len_m": 0.060, "theta0_deg": 14.7, "azimuth_deg": 120 },
-    { "horn_len_m": 0.010, "link_len_m": 0.060, "theta0_deg": 15.1, "azimuth_deg": 240 }
-  ],
-
-  "control": {
-    "loop_hz": 60,
-    "tilt_deg_limit": 8.0,
-
-    "pid_x": {
-      "kp": 7.0,
-      "ki": 0.0,
-      "kd": 0.7,
-      "d_lp_hz": 20.0,
-      "i_clamp": 0.2
-    },
-    "pid_y": {
-      "kp": 7.0,
-      "ki": 0.0,
-      "kd": 0.7,
-      "d_lp_hz": 20.0,
-      "i_clamp": 0.2
-    }
-  },
-
-  "logging": {
-    "enabled": true,
-    "path": "runs/session.csv"
+    "theta0_deg": [15.0, 15.0, 15.0]
   }
 }
