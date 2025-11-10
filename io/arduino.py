@@ -17,7 +17,7 @@ class ServoBus:
     def __init__(
         self,
         port: str,
-        baud: int = 115200,
+        baud: int = 9600,
         timeout_s: float = 0.02,
         neutral_deg: Sequence[float] = (15.0, 15.0, 15.0),
         limits_deg: Optional[dict] = None,  # {"min": 0, "max": 30}
@@ -63,16 +63,18 @@ class ServoBus:
     # ----- commands -----
     def send_angles(self, t1: float, t2: float, t3: float):
         """
-        Send three angles (deg) in CSV format expected by your sketch.
+        Send three angles (deg) as 3 bytes, matching ballBalance copy approach.
         Values are rounded to integers and clamped to [min_deg, max_deg].
         """
         if not self.ser or not self.ser.is_open:
+            print("Warning: Serial port not open!")
             return
         a = int(round(_clip(t1, self.min_deg, self.max_deg)))
         b = int(round(_clip(t2, self.min_deg, self.max_deg)))
         c = int(round(_clip(t3, self.min_deg, self.max_deg)))
-        line = f"{a},{b},{c}\n".encode("ascii")
-        self.ser.write(line)
+        # Send 3 bytes: angle1, angle2, angle3 (matching ballBalance copy method)
+        self.ser.write(bytes([a, b, c]))
+        self.ser.flush()  # Ensure data is sent immediately
 
     def level(self):
         """Send neutral angles."""

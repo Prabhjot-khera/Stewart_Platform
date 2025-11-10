@@ -25,6 +25,8 @@ try:
     print("Connecting to Arduino...")
     servo.open()
     print("Connected! Sending random angles (Ctrl+C to stop)...\n")
+    print("Waiting 2 seconds for Arduino to initialize...")
+    time.sleep(2)
     
     for i in range(100):
         # Random angles between 0 and 30 degrees

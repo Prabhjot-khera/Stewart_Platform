@@ -19,9 +19,9 @@ int targetAngle2 = NEUTRAL_ANGLE;
 int targetAngle3 = NEUTRAL_ANGLE;
 bool newCommand = false;
 
-// Buffer for reading serial data
-String inputString = "";
-bool stringComplete = false;
+// Byte buffer for reading 3 angles
+byte angleBuffer[3];
+int bytesReceived = 0;
 
 void setup() {
   Serial.begin(9600);  // Match config.json baud rate
@@ -39,62 +39,30 @@ void setup() {
 }
 
 void loop() {
-  // Read serial data (expecting format: "angle1,angle2,angle3\n")
-  while (Serial.available() > 0) {
-    char inChar = (char)Serial.read();
-    
-    if (inChar == '\n') {
-      stringComplete = true;
-      break;
-    } else {
-      inputString += inChar;
-    }
+  // Read 3 bytes: angle1, angle2, angle3 (matching ballBalance copy method)
+  while (Serial.available() > 0 && bytesReceived < 3) {
+    angleBuffer[bytesReceived] = Serial.read();
+    bytesReceived++;
   }
 
-  // Parse the received string
-  if (stringComplete) {
-    // Parse format: "angle1,angle2,angle3"
-    int comma1 = inputString.indexOf(',');
-    int comma2 = inputString.indexOf(',', comma1 + 1);
+  // When we have all 3 bytes, process them
+  if (bytesReceived >= 3) {
+    int angle1 = angleBuffer[0];
+    int angle2 = angleBuffer[1];
+    int angle3 = angleBuffer[2];
     
-    // Debug: print what was received (comment out after testing)
-    // Serial.print("Received: '");
-    // Serial.print(inputString);
-    // Serial.println("'");
-    
-    if (comma1 >= 0 && comma2 > comma1 && comma2 < inputString.length()) {
-      int angle1 = inputString.substring(0, comma1).toInt();
-      int angle2 = inputString.substring(comma1 + 1, comma2).toInt();
-      int angle3 = inputString.substring(comma2 + 1).toInt();
-      
-      // Debug: print parsed angles (comment out after testing)
-      // Serial.print("Parsed: ");
-      // Serial.print(angle1);
-      // Serial.print(", ");
-      // Serial.print(angle2);
-      // Serial.print(", ");
-      // Serial.println(angle3);
-      
-      // Validate and clamp angles
-      if (angle1 >= MIN_ANGLE && angle1 <= MAX_ANGLE &&
-          angle2 >= MIN_ANGLE && angle2 <= MAX_ANGLE &&
-          angle3 >= MIN_ANGLE && angle3 <= MAX_ANGLE) {
-        targetAngle1 = angle1;
-        targetAngle2 = angle2;
-        targetAngle3 = angle3;
-        newCommand = true;
-      } else {
-        // Debug: angles out of range
-        // Serial.println("Angles out of range!");
-      }
-    } else {
-      // Debug: invalid format
-      // Serial.println("Invalid format!");
+    // Validate and clamp angles
+    if (angle1 >= MIN_ANGLE && angle1 <= MAX_ANGLE &&
+        angle2 >= MIN_ANGLE && angle2 <= MAX_ANGLE &&
+        angle3 >= MIN_ANGLE && angle3 <= MAX_ANGLE) {
+      targetAngle1 = angle1;
+      targetAngle2 = angle2;
+      targetAngle3 = angle3;
+      newCommand = true;
     }
     
-    // Clear the string for next input
-    inputString = "";
-    stringComplete = false;
+    // Reset buffer for next command
+    bytesReceived = 0;
   }
 
   // Update servos if new command received
