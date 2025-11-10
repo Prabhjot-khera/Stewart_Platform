@@ -49,7 +49,11 @@ from detector2 import BallDetector2D
 from circle_mapper import CircleMapper
 
 def load_cfg():
-    path = "config/config.json"
+    # Get path relative to script location, not current working directory
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+    path = os.path.join(PROJECT_ROOT, "config", "config.json")
+    
     if os.path.exists(path):
         with open(path, "r") as f:
             return json.load(f)
@@ -107,10 +111,11 @@ def main():
     """Test ball detection + circle mapping with current config."""
     cfg = load_cfg()
 
-    detector = BallDetector2D(cfg["vision"])
-    mapper   = CircleMapper(cfg["plate"]["radius_m"], cfg["mapping"])
+    detector = BallDetector2D(cfg.get("vision", {}))
+    mapper   = CircleMapper(cfg.get("plate", {}).get("radius_m", 0.15), cfg.get("mapping", {}))
 
-    cap = cv2.VideoCapture(cfg["camera"]["index"])
+    cam = cfg.get("camera", {})
+    cap = cv2.VideoCapture(int(cam.get("index", 0)))
     if not cap.isOpened():
         print("❌ Failed to open camera"); return
 

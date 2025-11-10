@@ -4,6 +4,8 @@ import cv2
 import numpy as np
 from typing import Dict, Any
 import time
+import json
+import os
 
 class BallDetector2D:
     """
@@ -94,25 +96,37 @@ class BallDetector2D:
         return out
 
 if __name__ == "__main__":
-    cfg = {
-        "camera": {"index": 1, "width": 1280, "height": 720, "fps": 60},
-        "vision": {
-            "ball_hsv_lower": [10, 120, 120],
-            "ball_hsv_upper": [25, 255, 255],
-            "erode_iter": 2,
-            "dilate_iter": 2,
-            "morph_kernel": 5,
-            "min_radius_px": 8,
-            "max_radius_px": 200,
-            "min_area_frac": 0.0003,
-            "deglare": False
+    # Get path relative to script location, not current working directory
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+    CFG_PATH = os.path.join(PROJECT_ROOT, "config", "config.json")
+    
+    # Load config from file, or use defaults
+    if os.path.exists(CFG_PATH):
+        with open(CFG_PATH, "r") as f:
+            cfg = json.load(f)
+    else:
+        # Fallback defaults
+        cfg = {
+            "camera": {"index": 1, "width": 640, "height": 480, "fps": 30},
+            "vision": {
+                "ball_hsv_lower": [10, 120, 120],
+                "ball_hsv_upper": [25, 255, 255],
+                "erode_iter": 2,
+                "dilate_iter": 2,
+                "morph_kernel": 5,
+                "min_radius_px": 8,
+                "max_radius_px": 200,
+                "min_area_frac": 0.0003,
+                "deglare": False
+            }
         }
-    }
 
-    cap = cv2.VideoCapture(cfg["camera"]["index"])
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH,  cfg["camera"]["width"])
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cfg["camera"]["height"])
-    cap.set(cv2.CAP_PROP_FPS,          cfg["camera"]["fps"])
+    cam = cfg.get("camera", {})
+    cap = cv2.VideoCapture(int(cam.get("index", 1)))
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH,  cam.get("width", 640))
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cam.get("height", 480))
+    cap.set(cv2.CAP_PROP_FPS,          cam.get("fps", 30))
     if not cap.isOpened():
         print("❌ Could not open camera"); raise SystemExit
 
