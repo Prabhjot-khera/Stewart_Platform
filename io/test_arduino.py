@@ -4,7 +4,7 @@ import json
 import os
 import random
 import time
-from io.arduino import ServoBus
+from arduino import ServoBus
 
 # Load config
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -23,8 +23,9 @@ servo = ServoBus(
 
 try:
     print("Connecting to Arduino...")
+    print(f"Port: {cfg['servo']['port']}, Baud: {cfg['servo']['baud']}")
     servo.open()
-    print("Connected! Sending random angles (Ctrl+C to stop)...\n")
+    print("✅ Connected! Sending test angles (Ctrl+C to stop)...\n")
     print("Waiting 2 seconds for Arduino to initialize...")
     time.sleep(2)
     
@@ -57,12 +58,19 @@ try:
         time.sleep(0.5)
         
 except KeyboardInterrupt:
-    print("\nStopped by user")
+    print("\n\nStopped by user")
 except Exception as e:
-    print(f"Error: {e}")
+    print(f"\n❌ Error: {e}")
+    import traceback
+    traceback.print_exc()
 finally:
-    print("Returning to neutral...")
-    servo.level()
-    time.sleep(0.5)
-    servo.close()
-    print("Done.")
+    print("\nCleaning up...")
+    try:
+        print("Returning to neutral...")
+        servo.level()
+        time.sleep(0.5)
+    except Exception as e:
+        print(f"Warning: Error during cleanup: {e}")
+    finally:
+        servo.close()
+        print("✅ Port closed. Done.")

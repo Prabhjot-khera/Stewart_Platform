@@ -34,21 +34,43 @@ class ServoBus:
     # ----- lifecycle -----
     def open(self):
         self.close()
-        self.ser = serial.Serial(self.port, self.baud, timeout=self.timeout)
-        # many Arduinos auto-reset on serial open; give it a moment
-        time.sleep(0.5)
-        self.flush()
-        # move to neutral once connected
-        self.level()
-        return self  # allow chaining
+        # Wait a bit longer to ensure port is fully released
+        time.sleep(0.2)
+        
+        # Try to open with retry logic
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                self.ser = serial.Serial(self.port, self.baud, timeout=self.timeout)
+                # many Arduinos auto-reset on serial open; give it a moment
+                time.sleep(0.5)
+                self.flush()
+                # move to neutral once connected
+                self.level()
+                return self  # allow chaining
+            except serial.SerialException as e:
+                if attempt < max_retries - 1:
+                    print(f"Port open attempt {attempt + 1} failed: {e}")
+                    print("Retrying in 0.5 seconds...")
+                    time.sleep(0.5)
+                    self.close()  # Ensure clean state
+                else:
+                    raise
 
     def close(self):
         if self.ser:
             try:
+                # Flush buffers before closing
+                if self.ser.is_open:
+                    self.ser.reset_input_buffer()
+                    self.ser.reset_output_buffer()
                 self.ser.close()
             except Exception:
                 pass
-            self.ser = None
+            finally:
+                self.ser = None
+            # Give the OS time to release the port
+            time.sleep(0.1)
 
     def flush(self):
         if not self.ser:
