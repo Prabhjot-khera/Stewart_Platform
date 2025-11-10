@@ -28,6 +28,24 @@ try:
     print("Waiting 2 seconds for Arduino to initialize...")
     time.sleep(2)
     
+    # Test with known angles first
+    print("Testing with fixed angles first...")
+    test_angles = [
+        (20, 15, 15),  # Servo 1 up
+        (15, 20, 15),  # Servo 2 up
+        (15, 15, 20),  # Servo 3 up
+        (10, 15, 15),  # Servo 1 down
+        (15, 10, 15),  # Servo 2 down
+        (15, 15, 10),  # Servo 3 down
+    ]
+    
+    for a1, a2, a3 in test_angles:
+        print(f"Sending: ({a1}°, {a2}°, {a3}°)")
+        servo.send_angles(a1, a2, a3)
+        time.sleep(1.0)
+        input("Did servos move? Press Enter to continue...")
+    
+    print("\nNow sending random angles...")
     for i in range(100):
         # Random angles between 0 and 30 degrees
         a1 = random.randint(0, 30)

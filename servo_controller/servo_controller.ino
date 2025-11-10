@@ -25,6 +25,14 @@ int bytesReceived = 0;
 
 void setup() {
   Serial.begin(9600);  // Match config.json baud rate
+  
+  // Wait for serial connection to stabilize
+  delay(100);
+  
+  // Clear any leftover data in serial buffer
+  while (Serial.available() > 0) {
+    Serial.read();
+  }
 
   servo1.attach(servoPin1);
   servo2.attach(servoPin2);
@@ -40,16 +48,27 @@ void setup() {
 
 void loop() {
   // Read 3 bytes: angle1, angle2, angle3 (matching ballBalance copy method)
-  while (Serial.available() > 0 && bytesReceived < 3) {
-    angleBuffer[bytesReceived] = Serial.read();
-    bytesReceived++;
+  // Collect bytes as they arrive
+  if (Serial.available() > 0) {
+    while (Serial.available() > 0 && bytesReceived < 3) {
+      angleBuffer[bytesReceived] = Serial.read();
+      bytesReceived++;
+    }
   }
 
   // When we have all 3 bytes, process them
-  if (bytesReceived >= 3) {
+  if (bytesReceived == 3) {
     int angle1 = angleBuffer[0];
     int angle2 = angleBuffer[1];
     int angle3 = angleBuffer[2];
+    
+    // Debug: uncomment to see received angles
+    // Serial.print("Received: ");
+    // Serial.print(angle1);
+    // Serial.print(", ");
+    // Serial.print(angle2);
+    // Serial.print(", ");
+    // Serial.println(angle3);
     
     // Validate and clamp angles
     if (angle1 >= MIN_ANGLE && angle1 <= MAX_ANGLE &&

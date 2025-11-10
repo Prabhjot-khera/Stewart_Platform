@@ -73,8 +73,11 @@ class ServoBus:
         b = int(round(_clip(t2, self.min_deg, self.max_deg)))
         c = int(round(_clip(t3, self.min_deg, self.max_deg)))
         # Send 3 bytes: angle1, angle2, angle3 (matching ballBalance copy method)
-        self.ser.write(bytes([a, b, c]))
+        data = bytes([a, b, c])
+        self.ser.write(data)
         self.ser.flush()  # Ensure data is sent immediately
+        # Debug: uncomment to verify bytes being sent
+        # print(f"Sent bytes: {[a, b, c]} = {data.hex()}")
 
     def level(self):
         """Send neutral angles."""
