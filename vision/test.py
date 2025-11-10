@@ -59,7 +59,7 @@ def load_cfg():
             return json.load(f)
     # Fallback defaults
     return {
-        "camera": {"index": 0},
+        "camera": {"index": 1},
         "vision": {
             "ball_hsv_lower": [10, 120, 120],
             "ball_hsv_upper": [25, 255, 255],
@@ -115,7 +115,7 @@ def main():
     mapper   = CircleMapper(cfg.get("plate", {}).get("radius_m", 0.15), cfg.get("mapping", {}))
 
     cam = cfg.get("camera", {})
-    cap = cv2.VideoCapture(int(cam.get("index", 0)))
+    cap = cv2.VideoCapture(int(cam.get("index", 1)))
     if not cap.isOpened():
         print("❌ Failed to open camera"); return
 

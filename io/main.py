@@ -22,7 +22,7 @@ from vision.detector2 import BallDetector2D
 from vision.circle_mapper import CircleMapper
 from control.pid import PID1D
 from kinematics.ik_small import ThreeServoTiltIKSmall
-from io.arduino import ServoBus
+from arduino import ServoBus
 
 def load_config():
     """Load config.json with proper path resolution."""

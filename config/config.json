@@ -1,6 +1,6 @@
 {
   "camera": {
-    "index": 0,
+    "index": 1,
     "width": 640,
     "height": 480,
     "fps": 60
@@ -48,8 +48,8 @@
   },
 
   "servo": {
-    "port": "COM5",
-    "baud": 115200,
+    "port": "COM6",
+    "baud": 9600,
     "theta0_deg": [15.0, 15.0, 15.0]
   }
 }
