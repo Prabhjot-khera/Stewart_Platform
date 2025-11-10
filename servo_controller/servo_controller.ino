@@ -24,7 +24,7 @@ String inputString = "";
 bool stringComplete = false;
 
 void setup() {
-  Serial.begin(115200);  // Match config.json baud rate
+  Serial.begin(9600);  // Match config.json baud rate
 
   servo1.attach(servoPin1);
   servo2.attach(servoPin2);
@@ -57,10 +57,23 @@ void loop() {
     int comma1 = inputString.indexOf(',');
     int comma2 = inputString.indexOf(',', comma1 + 1);
     
-    if (comma1 > 0 && comma2 > comma1) {
+    // Debug: print what was received (comment out after testing)
+    // Serial.print("Received: '");
+    // Serial.print(inputString);
+    // Serial.println("'");
+    
+    if (comma1 >= 0 && comma2 > comma1 && comma2 < inputString.length()) {
       int angle1 = inputString.substring(0, comma1).toInt();
       int angle2 = inputString.substring(comma1 + 1, comma2).toInt();
       int angle3 = inputString.substring(comma2 + 1).toInt();
+      
+      // Debug: print parsed angles (comment out after testing)
+      // Serial.print("Parsed: ");
+      // Serial.print(angle1);
+      // Serial.print(", ");
+      // Serial.print(angle2);
+      // Serial.print(", ");
+      // Serial.println(angle3);
       
       // Validate and clamp angles
       if (angle1 >= MIN_ANGLE && angle1 <= MAX_ANGLE &&
@@ -70,7 +83,13 @@ void loop() {
         targetAngle2 = angle2;
         targetAngle3 = angle3;
         newCommand = true;
+      } else {
+        // Debug: angles out of range
+        // Serial.println("Angles out of range!");
       }
+    } else {
+      // Debug: invalid format
+      // Serial.println("Invalid format!");
     }
     
     // Clear the string for next input
