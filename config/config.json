@@ -1,9 +1,9 @@
 {
   "camera": {
     "index": 0,
-    "width": 1280,
-    "height": 720,
-    "fps": 60
+    "width": 640,
+    "height": 480,
+    "fps": 30
   },
 
   "vision": {
@@ -19,7 +19,7 @@
   },
 
   "plate": {
-    "radius_m": 0.10,
+    "radius_m": 0.15,
     "servo_azimuth_deg": [0, 120, 240]
   },
 

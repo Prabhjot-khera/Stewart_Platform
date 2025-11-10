@@ -2,7 +2,10 @@
 import cv2, json, os, time
 import numpy as np
 
-CFG_PATH = "config/config.json"
+# Get path relative to script location, not current working directory
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+CFG_PATH = os.path.join(PROJECT_ROOT, "config", "config.json")
 
 def _ensure_cfg(path=CFG_PATH):
     if os.path.exists(path):
@@ -11,7 +14,7 @@ def _ensure_cfg(path=CFG_PATH):
             except: pass
     # defaults if no config present
     return {
-        "camera": {"index": 0, "width": 1280, "height": 720, "fps": 60},
+        "camera": {"index": 0, "width": 640, "height": 480, "fps": 30},
         "vision": {
             "ball_hsv_lower": [10, 120, 120],
             "ball_hsv_upper": [25, 255, 255],
@@ -45,11 +48,11 @@ def main():
     deglare  = bool(_get(v, "deglare", False))
 
     # camera
-    cam = cfg.get("camera", {"index": 0})
-    cap = cv2.VideoCapture(int(cam.get("index", 0)))
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH,  cam.get("width", 1280))
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cam.get("height", 720))
-    cap.set(cv2.CAP_PROP_FPS,          cam.get("fps", 60))
+    cam = cfg.get("camera", {"index": 1})
+    cap = cv2.VideoCapture(int(cam.get("index", 1)))
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH,  cam.get("width", 640))
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cam.get("height", 480))
+    cap.set(cv2.CAP_PROP_FPS,          cam.get("fps", 30))
 
     if not cap.isOpened():
         print("❌ Could not open camera"); return
